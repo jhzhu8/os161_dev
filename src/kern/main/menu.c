@@ -344,6 +344,30 @@ cmd_deadlock(int nargs, char **args)
 }
 
 /*
+ * Command to toggle thread debugging msgs
+ */
+
+static
+int
+cmd_dth(int nargs, char **args)
+{
+	(void)nargs;
+	(void)args;
+
+	// toggle
+	if(dbflags & DB_THREADS) {
+		dbflags &= ~(uint32_t)(DB_THREADS);
+		kprintf("DB_THREADS disabled (dbflags=0x%x)\n", dbflags);
+	} else {
+		dbflags |= DB_THREADS;
+		kprintf("DB_THREADS enabled (dbflags=0x%x)\n", dbflags);
+	}
+
+	return 0;
+}
+
+
+/*
  * Command for shutting down.
  */
 static
@@ -536,6 +560,7 @@ static const char *opsmenu[] = {
 	"[debug]   Drop to debugger          ",
 	"[panic]   Intentional panic         ",
 	"[deadlock] Intentional deadlock     ",
+	"[dth] 	   Toggle thread debug msgs  ",
 	"[q]       Quit and shut down        ",
 	NULL
 };
@@ -644,6 +669,7 @@ static struct {
 	{ "debug",	cmd_debug },
 	{ "panic",	cmd_panic },
 	{ "deadlock",	cmd_deadlock },
+	{ "dth", cmd_dth },
 	{ "q",		cmd_quit },
 	{ "exit",	cmd_quit },
 	{ "halt",	cmd_quit },
