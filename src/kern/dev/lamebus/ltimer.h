@@ -29,7 +29,7 @@
 
 #ifndef _LAMEBUS_LTIMER_H_
 #define _LAMEBUS_LTIMER_H_
-
+#include "opt-UW.h"
 struct timespec;
 
 /*
@@ -44,6 +44,12 @@ struct ltimer_softc {
 	void *lt_bus;		/* bus we're on */
 	uint32_t lt_buspos;	/* position (slot) on that bus */
 };
+
+#if OPT_UW
+/* Granularity of countdown timer (usec) */
+/* Should be less than 1000000 */
+#define LT_GRANULARITY   10000
+#endif
 
 /* Functions called by lower-level drivers */
 void ltimer_irq(/*struct ltimer_softc*/ void *lt);  // interrupt handler

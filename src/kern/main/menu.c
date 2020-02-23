@@ -45,6 +45,8 @@
 #include <test.h>
 #include "opt-sfs.h"
 #include "opt-net.h"
+#include "opt-UW.h"
+#include "opt-synchprobs.h"
 
 /*
  * In-kernel menu and command dispatcher.
@@ -117,6 +119,11 @@ common_prog(int nargs, char **args)
 	struct proc *proc;
 	int result;
 
+#if OPT_SYNCHPROBS
+	kprintf("Warning: this probably won't work with a "
+		"synchronization-problems kernel.\n");
+#endif
+
 	/* Create a process for the new program to run in. */
 	proc = proc_create_runprogram(args[0] /* name */);
 	if (proc == NULL) {
@@ -137,6 +144,11 @@ common_prog(int nargs, char **args)
 	 * The new process will be destroyed when the program exits...
 	 * once you write the code for handling that.
 	 */
+#if OPT_UW
+	/* wait until the process we have just launched - and any others that it 
+	   may fork - is finished before proceeding */
+	P(no_proc_sem);
+#endif // UW
 
 	return 0;
 }
@@ -595,6 +607,10 @@ static const char *testmenu[] = {
 	"[sy2] Lock test             (1)     ",
 	"[sy3] CV test               (1)     ",
 	"[sy4] CV test #2            (1)     ",
+#if OPT_UW
+	"[uw1] UW lock test          (1)     ",
+	"[uw2] UW vmstats test       (3)     ",
+#endif // UW
 	"[semu1-22] Semaphore unit tests     ",
 	"[fs1] Filesystem test               ",
 	"[fs2] FS read stress                ",
@@ -623,6 +639,13 @@ cmd_testmenu(int n, char **a)
 static const char *mainmenu[] = {
 	"[?o] Operations menu                ",
 	"[?t] Tests menu                     ",
+#if OPT_SYNCHPROBS
+	"[sp1] Whale Mating                  ",
+#if OPT_UW
+	"[sp2] Cat/mouse                     ",
+	"[sp3] Traffic                       ",
+#endif /* UW */
+#endif
 	"[kh] Kernel heap stats              ",
 	"[khgen] Next kernel heap generation ",
 	"[khdump] Dump kernel heap           ",
@@ -674,6 +697,15 @@ static struct {
 	{ "exit",	cmd_quit },
 	{ "halt",	cmd_quit },
 
+#if OPT_SYNCHPROBS
+	/* in-kernel synchronization problem(s) */
+	{ "sp1",	whalemating },
+#if OPT_UW
+	{ "sp2",	catmouse },
+	{ "sp3",	traffic_simulation },
+#endif /* UW */
+#endif
+
 	/* stats */
 	{ "kh",         cmd_kheapstats },
 	{ "khgen",      cmd_kheapgeneration },
@@ -700,6 +732,10 @@ static struct {
 	{ "sy2",	locktest },
 	{ "sy3",	cvtest },
 	{ "sy4",	cvtest2 },
+#if OPT_UW
+	{ "uw1",	uwlocktest1 },
+	{ "uw2",	uwvmstatstest },
+#endif
 
 	/* semaphore unit tests */
 	{ "semu1",	semu1 },

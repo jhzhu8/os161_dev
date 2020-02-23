@@ -283,6 +283,8 @@ file      lib/kprintf.c
 file      lib/misc.c
 file      lib/time.c
 file      lib/uio.c
+# UW Mod
+file      lib/queue.c
 
 defoption noasserts
 
@@ -320,6 +322,8 @@ file      ../common/libc/string/strtok_r.c
 #
 
 file      thread/clock.c
+# UW Mod
+# file      thread/proc.c
 file      thread/spl.c
 file      thread/spinlock.c
 file      thread/synch.c
@@ -341,7 +345,10 @@ file      proc/proc.c
 #
 
 file      vm/kmalloc.c
-
+file      vm/uw-vmstats.c
+# UW Mod - no longer used
+#defoption vm
+#optfile   vm   vm/vm.c
 optofffile dumbvm   vm/addrspace.c
 
 #
@@ -379,6 +386,9 @@ file      vfs/devnull.c
 file      syscall/loadelf.c
 file      syscall/runprogram.c
 file      syscall/time_syscalls.c
+# UW additions
+file      syscall/proc_syscalls.c
+file      syscall/file_syscalls.c
 
 #
 # Startup and initialization
@@ -424,6 +434,20 @@ defoption netfs
 # Note that "emufs" is completely contained in the "emu" device.
 #
 
+########################################
+#                                      #
+#  Synchronization problems assignment #
+#                                      #
+########################################
+
+defoption synchprobs
+optfile   synchprobs  synchprobs/whalemating.c
+# UW Mod
+optfile   synchprobs  synchprobs/catmouse.c
+optfile   synchprobs  synchprobs/catmouse_synch.c
+optfile   synchprobs  synchprobs/traffic.c
+optfile   synchprobs  synchprobs/traffic_synch.c
+
 
 ########################################
 #                                      #
@@ -441,3 +465,15 @@ file		test/semunit.c
 file		test/kmalloctest.c
 file		test/fstest.c
 optfile net	test/nettest.c
+# UW Mod
+file    test/uw-tests.c
+
+
+# UW options for different assignments
+defoption UW
+defoption A0
+defoption A1
+defoption A2
+defoption A3
+defoption A4
+defoption A5

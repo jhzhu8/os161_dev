@@ -50,6 +50,7 @@
 #include <test.h>
 #include <version.h>
 #include "autoconf.h"  // for pseudoconfig
+#include "opt-UW.h"
 
 
 /*
@@ -103,7 +104,12 @@ boot(void)
 
 	kprintf("Jack Zhu's CS350 OS %s (%s #%d)\n",
 		GROUP_VERSION, buildconfig, buildversion);
+#if OPT_UW
+	kprintf("UW-Build enabled\n");
+#endif
 	kprintf("\n");
+
+
 
 	/* Early initialization. */
 	ram_bootstrap();

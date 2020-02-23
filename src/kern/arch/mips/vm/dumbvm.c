@@ -39,6 +39,7 @@
 #include <addrspace.h>
 #include <vm.h>
 
+#include "opt-UW.h"
 /*
  * Dumb MIPS-only "VM system" that is intended to only be just barely
  * enough to struggle off the ground. You should replace all of this
@@ -270,6 +271,10 @@ as_activate(void)
 	if (as == NULL) {
 		return;
 	}
+
+#if OPT_UW
+        /* Kernel threads don't have an address spaces to activate */
+#endif
 
 	/* Disable interrupts on this CPU while frobbing the TLB. */
 	spl = splhigh();

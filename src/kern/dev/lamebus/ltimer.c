@@ -37,6 +37,7 @@
 #include <platform/bus.h>
 #include <lamebus/ltimer.h>
 #include "autoconf.h"
+#include "opt-UW.h"
 
 /* Registers (offsets within slot) */
 #define LT_REG_SEC    0     /* time of day: seconds */
@@ -46,8 +47,10 @@
 #define LT_REG_COUNT  16    /* Time for countdown timer (usec) */
 #define LT_REG_SPKR   20    /* Beep control */
 
+#if (OPT_UW == 0)
 /* Granularity of countdown timer (usec) */
 #define LT_GRANULARITY   1000000
+#endif
 
 static bool havetimerclock;
 

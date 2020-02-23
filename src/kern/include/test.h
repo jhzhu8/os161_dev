@@ -29,12 +29,19 @@
 
 #ifndef _TEST_H_
 #define _TEST_H_
-
+#include "opt-UW.h"
 /*
  * Declarations for test code and other miscellaneous high-level
  * functions.
  */
 
+/* This is only actually available if OPT_SYNCHPROBS is set. */
+int whalemating(int, char **);
+
+#if OPT_UW
+int catmouse(int, char **);
+int traffic_simulation(int, char **);
+#endif
 
 /*
  * Test code.
@@ -54,6 +61,13 @@ int semtest(int, char **);
 int locktest(int, char **);
 int cvtest(int, char **);
 int cvtest2(int, char **);
+
+#if OPT_UW
+/* Another thread and synchronization test */
+int uwlocktest1(int, char **);
+/* Used to test uw-vmstats */
+int uwvmstatstest(int, char **);
+#endif
 
 /* semaphore unit tests */
 int semu1(int, char **);

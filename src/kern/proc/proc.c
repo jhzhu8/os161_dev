@@ -49,10 +49,31 @@
 #include <addrspace.h>
 #include <vnode.h>
 
+#include "opt-UW.h"
+
+#if OPT_UW
+#include <vfs.h>
+#include <synch.h>
+#include <kern/fcntl.h>  
+#endif
+
 /*
  * The process for the kernel; this holds all the kernel-only threads.
  */
 struct proc *kproc;
+
+/*
+ * Mechanism for making the kernel menu thread sleep while processes are running
+ */
+#if OPT_UW
+/* count of the number of processes, excluding kproc */
+static volatile unsigned int proc_count;
+/* provides mutual exclusion for proc_count */
+/* it would be better to use a lock here, but we use a semaphore because locks are not implemented in the base kernel */ 
+static struct semaphore *proc_count_mutex;
+/* used to signal the kernel menu thread when there are no processes */
+struct semaphore *no_proc_sem;   
+#endif  // UW
 
 /*
  * Create a proc structure.
@@ -117,6 +138,7 @@ proc_destroy(struct proc *proc)
 		proc->p_cwd = NULL;
 	}
 
+#if (OPT_UW == 0)
 	/* VM fields */
 	if (proc->p_addrspace) {
 		/*
@@ -164,12 +186,35 @@ proc_destroy(struct proc *proc)
 		}
 		as_destroy(as);
 	}
+#endif
+
+#if UW
+	if (proc->console) {
+	  vfs_close(proc->console);
+	}
+#endif
 
 	KASSERT(proc->p_numthreads == 0);
 	spinlock_cleanup(&proc->p_lock);
 
 	kfree(proc->p_name);
 	kfree(proc);
+
+#if OPT_UW
+	/* decrement the process count */
+        /* note: kproc is not included in the process count, but proc_destroy
+	   is never called on kproc (see KASSERT above), so we're OK to decrement
+	   the proc_count unconditionally here */
+	P(proc_count_mutex); 
+	KASSERT(proc_count > 0);
+	proc_count--;
+	/* signal the kernel menu thread if the process count has reached zero */
+	if (proc_count == 0) {
+	  V(no_proc_sem);
+	}
+	V(proc_count_mutex);
+#endif // UW
+
 }
 
 /*

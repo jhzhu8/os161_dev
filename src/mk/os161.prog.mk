@@ -26,6 +26,9 @@
 # set by os161.config.mk will get lost and bad things will happen.
 #
 
+# UW Mod
+.include "$(TOP)/mk/os161.uw-prog.mk"
+
 BINDIR?=/bin
 
 # We may want these directories created. (Used by os161.baserules.mk.)

@@ -51,6 +51,9 @@
 #include <mainbus.h>
 #include <vnode.h>
 
+#include "opt-UW.h"
+#include "opt-synchprobs.h"
+
 
 /* Magic number used as a guard value on kernel thread stacks. */
 #define THREAD_STACK_MAGIC 0xbaadf00d
@@ -500,6 +503,10 @@ thread_fork(const char *name,
 	struct thread *newthread;
 	int result;
 
+#if	OPT_UW
+	DEBUG(DB_THREADS,"Forking thread: %s\n",name);
+#endif // UW
+
 	newthread = thread_create(name);
 	if (newthread == NULL) {
 		return ENOMEM;
@@ -758,6 +765,18 @@ thread_startup(void (*entrypoint)(void *data1, unsigned long data2),
 
 	/* Enable interrupts. */
 	spl0();
+#if OPT_UW
+#if OPT_SYNCHPROBS
+	/* Yield a random number of times to get a good mix of threads. */
+	{
+		int i, n;
+		n = random()%161 + random()%161;
+		for (i=0; i<n; i++) {
+			thread_yield();
+		}
+	}
+#endif
+#endif
 
 	/* Call the function. */
 	entrypoint(data1, data2);
@@ -786,7 +805,17 @@ thread_exit(void)
 	 * Detach from our process. You might need to move this action
 	 * around, depending on how your wait/exit works.
 	 */
+#if OPT_UW
+	/* threads for user processes should have detached from their process
+	   in sys__exit */
+	KASSERT(curproc == kproc || curproc == NULL);	
+	/* kernel threads don't go through sys__exit, so we detach them from kproc here */
+	if (curproc == kproc) {
+	  proc_remthread(cur);
+	}
+#else // UW
 	proc_remthread(cur);
+#endif // UW
 
 	/* Make sure we *are* detached (move this only if you're sure!) */
 	KASSERT(cur->t_proc == NULL);

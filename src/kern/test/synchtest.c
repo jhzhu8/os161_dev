@@ -37,6 +37,7 @@
 #include <thread.h>
 #include <synch.h>
 #include <test.h>
+#include "opt-UW.h"
 
 #define NSEMLOOPS     63
 #define NLOCKLOOPS    120
@@ -46,10 +47,30 @@
 static volatile unsigned long testval1;
 static volatile unsigned long testval2;
 static volatile unsigned long testval3;
+#if OPT_UW
+static struct semaphore *testsem = 0;
+static struct lock *testlock = 0;
+static struct cv *testcv = 0;
+static struct semaphore *donesem = 0;
+#else
 static struct semaphore *testsem;
 static struct lock *testlock;
 static struct cv *testcv;
 static struct semaphore *donesem;
+#endif
+
+#if OPT_UW
+static
+void
+cleanitems(void)
+{
+	kprintf("cleanitems: Destroying sems, locks, and cvs\n");
+	sem_destroy(testsem);
+	lock_destroy(testlock);
+	cv_destroy(testcv);
+	sem_destroy(donesem);
+	}
+#endif
 
 static
 void
@@ -68,7 +89,11 @@ inititems(void)
 		}
 	}
 	if (testcv==NULL) {
+#if OPT_UW
+		testcv = cv_create("testcv");
+#else
 		testcv = cv_create("testlock");
+#endif
 		if (testcv == NULL) {
 			panic("synchtest: cv_create failed\n");
 		}
@@ -98,6 +123,9 @@ semtestthread(void *junk, unsigned long num)
 	}
 	kprintf("\n");
 	V(donesem);
+#if OPT_UW
+	thread_exit();
+#endif
 }
 
 int
@@ -131,6 +159,10 @@ semtest(int nargs, char **args)
 	/* so we can run it again */
 	V(testsem);
 	V(testsem);
+
+#if OPT_UW
+	cleanitems();
+#endif
 
 	kprintf("Semaphore test done.\n");
 	return 0;
@@ -189,6 +221,9 @@ locktestthread(void *junk, unsigned long num)
 		lock_release(testlock);
 	}
 	V(donesem);
+#if OPT_UW
+	thread_exit();
+#endif
 }
 
 
@@ -214,6 +249,10 @@ locktest(int nargs, char **args)
 	for (i=0; i<NTHREADS; i++) {
 		P(donesem);
 	}
+
+#if OPT_UW
+	cleanitems();
+#endif
 
 	kprintf("Lock test done.\n");
 
@@ -264,6 +303,9 @@ cvtestthread(void *junk, unsigned long num)
 		lock_release(testlock);
 	}
 	V(donesem);
+#if OPT_UW
+	thread_exit();
+#endif
 }
 
 int
@@ -277,7 +319,11 @@ cvtest(int nargs, char **args)
 
 	inititems();
 	kprintf("Starting CV test...\n");
+#if OPT_UW
+	kprintf("%d threads should print out in reverse order %d times.\n", NTHREADS, NCVLOOPS);
+#else
 	kprintf("Threads should print out in reverse order.\n");
+#endif
 
 	testval1 = NTHREADS-1;
 
@@ -291,6 +337,10 @@ cvtest(int nargs, char **args)
 	for (i=0; i<NTHREADS; i++) {
 		P(donesem);
 	}
+
+#if OPT_UW
+	cleanitems();
+#endif
 
 	kprintf("CV test done\n");
 

@@ -34,6 +34,10 @@
 #include <clock.h>
 #include <thread.h>
 #include <current.h>
+#include "opt-UW.h"
+#if OPT_UW
+#include <lamebus/ltimer.h>
+#endif
 
 /*
  * Time handling.

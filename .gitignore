@@ -55,4 +55,3 @@ dkms.conf
 *.code-workspace
 *.json
 .vscode
-*.json
