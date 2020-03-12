@@ -44,10 +44,10 @@
  * internally.
  */
 struct semaphore {
-        char *sem_name;
+    char *sem_name;
 	struct wchan *sem_wchan;
 	struct spinlock sem_lock;
-        volatile unsigned sem_count;
+    volatile unsigned sem_count;
 };
 
 struct semaphore *sem_create(const char *name, unsigned initial_count);
@@ -77,7 +77,12 @@ struct lock {
         HANGMAN_LOCKABLE(lk_hangman);   /* Deadlock detector hook. */
         // add what you need here
         // (don't forget to mark things volatile as needed)
+        volatile unsigned val;
+        struct wchan *lk_wchan;
+        struct spinlock lk_spl;
+        struct thread *lk_holder;	    /* CPU holding this lock. */
 };
+
 
 struct lock *lock_create(const char *name);
 void lock_destroy(struct lock *);
