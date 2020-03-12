@@ -55,3 +55,6 @@ dkms.conf
 *.code-workspace
 *.json
 .vscode
+src/kern/compile/ASST1/.depend
+src/kern/compile/ASST1/kernel
+src/kern/compile/ASST1/.depend.synch.c
