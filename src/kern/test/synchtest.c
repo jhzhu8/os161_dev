@@ -69,26 +69,26 @@ cleanitems(void)
 	lock_destroy(testlock);
 	cv_destroy(testcv);
 	sem_destroy(donesem);
-	}
+}
 #endif
 
 static
 void
 inititems(void)
 {
-	if (testsem==NULL) {
+	if (testsem == NULL) {
 		testsem = sem_create("testsem", 2);
 		if (testsem == NULL) {
 			panic("synchtest: sem_create failed\n");
 		}
 	}
-	if (testlock==NULL) {
+	if (testlock == NULL) {
 		testlock = lock_create("testlock");
 		if (testlock == NULL) {
 			panic("synchtest: lock_create failed\n");
 		}
 	}
-	if (testcv==NULL) {
+	if (testcv == NULL) {
 #if OPT_UW
 		testcv = cv_create("testcv");
 #else
@@ -98,7 +98,7 @@ inititems(void)
 			panic("synchtest: cv_create failed\n");
 		}
 	}
-	if (donesem==NULL) {
+	if (donesem == NULL) {
 		donesem = sem_create("donesem", 0);
 		if (donesem == NULL) {
 			panic("synchtest: sem_create failed\n");
